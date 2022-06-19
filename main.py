@@ -1,5 +1,6 @@
 import asyncio
 import datetime
+import json
 import random
 
 import conf as cf
@@ -21,19 +22,7 @@ message = discord.Message
 gifs = ['https://c.tenor.com/iu2d2HPdtzIAAAAC/tenor.gif', 'https://i.giphy.com/media/uVPv3hrAa4ehQeRHvk/giphy.gif', 'https://media0.giphy.com/media/MNfZSteJU94qc/giphy.gif?cid=790b76110d54693cc3b083a128883ed6c27be505f46fb491&rid=giphy.gif&ct=g', 'https://c.tenor.com/HHwDrmgUMw0AAAAC/vilebrequin-vilebrequin-sylvain-levy.gif', 'https://c.tenor.com/SXM68LEzlTYAAAAM/vilebrequin-vilebrequin-tellement-pt.gif', 'https://c.tenor.com/V8VPN6vsPqoAAAAC/vilebrequin-vilebrequin-sylvain-levy.gif', 'https://c.tenor.com/sx5M-bGDt1oAAAAd/vilebrequin-vilebrequin-cpt.gif']
 sample_embed = discord.Embed(title='Status bot is starting...', description='Please wait, this message will be edited.', color=discord.Color.blue())
 user = discord.User
-to_check = [
-    {'url': 'http://blaugue.camponovo.xyz', 'nom': 'Blaugue (personal blog)', 'desc': 'Blaugue, LE blog des cocoyoyos !', 'notify': True},
-    {'url': 'https://www.camarm.dev', 'nom': 'CAMARM Website (personal website)', 'desc': 'Site officiel de CAMARM-DEV.', 'notify': True},
-    {'url': 'http://192.168.1.32', 'nom': 'Nas OMV Local (storage)', 'desc': 'Local NAS', 'notify': True},
-    {'url': 'http://server.camarm.fr', 'nom': 'Tunnels / Redirections (urls)', 'desc': 'Very important, if this server is down, it\'s impossible to reach other services', 'notify': True},
-    {'url': 'http://ondine.camponovo.art', 'nom': 'Ondine Camponovo Portfolio (ondine website)', 'desc': 'Ondine Camponovo Portfolio', 'notify': True},
-    {'url': 'https://192.168.1.103:8006', 'nom': 'Odirion (hosting services)', 'desc': 'PVE node (all hosting services)', 'notify': True},
-    {'url': 'https://meteo.camarm.dev', 'nom': 'Meteo Station', 'desc': 'Station meteo Etalans website', 'notify': True},
-    {'url': 'http://vps1.camarm.fr:9090', 'nom': 'CAMARM Vps 1', 'desc': 'VPS 1', 'notify': False},
-    {'url': 'http://vps2.camarm.fr:9090', 'nom': 'CAMARM Vps 2', 'desc': 'VPS 2', 'notify': True},
-    {'url': 'http://152.228.131.152:40075', 'nom': 'Campo Vps 1', 'desc': 'VPS 3', 'notify': True},
-    {'url': 'https://cocoyoyo-librairie.camponovo.space', 'nom': 'Cocoyoyolibrairie (personal babelio)', 'desc': 'La cocoyoyoLibrairie est une bibliothèque virtuelle pour toute la famille.', 'notify': True},
-]
+to_check = json.loads(open('to_check.json').read())['data']
 timeout = 120
 
 
@@ -48,7 +37,7 @@ def ping(url):
         return False
 
 
-@tasks.loop(seconds=120)
+@tasks.loop(seconds=timeout)
 async def check_status():
     print('Checking status')
     embed = discord.Embed(title='Status checking', description='checking status of services...', color=discord.Color.light_grey())
@@ -57,7 +46,6 @@ async def check_status():
     is_a_down = False
     for service in to_check:
         response = ping(service['url'])
-        print(response)
         emoji = '🟢'
         if not response:
             emoji = '🔴'
