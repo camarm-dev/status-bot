@@ -1,0 +1,4 @@
+{"data":  [
+  {"url": "http://example.com", "nom": "Example website", "desc": "example website desc", "notify": true},
+  {"url": "https://www.camarm.dev", "nom": "CAMARM Website", "desc": "Site officiel de CAMARM-DEV.", "notify": false}
+]}
