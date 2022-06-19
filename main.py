@@ -4,7 +4,7 @@ import random
 
 import conf as cf
 import discord
-from discord.ext import commands
+from discord.ext import commands, tasks
 import requests
 
 bot = commands.Bot(command_prefix=".", description="Lambda.")
@@ -48,42 +48,41 @@ def ping(url):
         return False
 
 
+@tasks.loop(seconds=120)
 async def check_status():
-    while True:
-        print('Checking status')
-        embed = discord.Embed(title='Status checking', description='checking status of services...', color=discord.Color.light_grey())
-        new_message = await s_channel.send(embed=embed)
-        embed = discord.Embed(title='Status Bot:', description='Status of all services:')
-        is_a_down = False
-        for service in to_check:
-            response = ping(service['url'])
-            print(response)
-            emoji = '🟢'
-            if not response:
-                emoji = '🔴'
-                if service['notify']:
-                    is_a_down = True
-                    user_embed = discord.Embed(title='Oups...', description=f"It\'s seems like {service['url']} ({service['nom']} is down !)", color=discord.Color.dark_red())
-                    user_embed.set_image(url=random.choice(gifs))
-                    user_embed.set_author(name='Down service link here', url=service['url'], icon_url='https://cdn.discordapp.com/app-icons/987993226701058079/7236c41d6da22576a69f969d9c5397a9.png?size=256')
-                    await user.send(embed=user_embed)
-            name = f"{service['nom']} {emoji}"
-            embed.add_field(name=name, value=service['desc'], inline=False)
-        embed.set_author(name='Status Bot by CAMARM', url='https://www.camarm.dev', icon_url='https://cdn.discordapp.com/app-icons/987993226701058079/7236c41d6da22576a69f969d9c5397a9.png?size=256')
-        date = datetime.datetime.now().strftime('%c')
-        embed.set_footer(text=f'Last check {date}', icon_url='https://images.emojiterra.com/twitter/v12.1.5/512px/1f556.png')
-        if is_a_down:
-            embed.set_image(url=random.choice(gifs))
-            embed.color = discord.Color.red()
-        else:
-            embed.color = discord.Color.green()
-        await message.edit(embed=embed)
-        await new_message.delete()
-        await asyncio.sleep(timeout)
+    print('Checking status')
+    embed = discord.Embed(title='Status checking', description='checking status of services...', color=discord.Color.light_grey())
+    new_message = await s_channel.send(embed=embed)
+    embed = discord.Embed(title='Status Bot:', description='Status of all services:')
+    is_a_down = False
+    for service in to_check:
+        response = ping(service['url'])
+        print(response)
+        emoji = '🟢'
+        if not response:
+            emoji = '🔴'
+            if service['notify']:
+                is_a_down = True
+                user_embed = discord.Embed(title='Oups...', description=f"It\'s seems like {service['url']} ({service['nom']} is down !)", color=discord.Color.dark_red())
+                user_embed.set_image(url=random.choice(gifs))
+                user_embed.set_author(name='Down service link here', url=service['url'], icon_url='https://cdn.discordapp.com/app-icons/987993226701058079/7236c41d6da22576a69f969d9c5397a9.png?size=256')
+                await user.send(embed=user_embed)
+        name = f"{service['nom']} {emoji}"
+        embed.add_field(name=name, value=service['desc'], inline=False)
+    embed.set_author(name='Status Bot by CAMARM', url='https://www.camarm.dev', icon_url='https://cdn.discordapp.com/app-icons/987993226701058079/7236c41d6da22576a69f969d9c5397a9.png?size=256')
+    date = datetime.datetime.now().strftime('%c')
+    embed.set_footer(text=f'Last check {date}', icon_url='https://images.emojiterra.com/twitter/v12.1.5/512px/1f556.png')
+    if is_a_down:
+        embed.set_image(url=random.choice(gifs))
+        embed.color = discord.Color.red()
+    else:
+        embed.color = discord.Color.green()
+    await message.edit(embed=embed)
+    await new_message.delete()
 
 
 async def start():
-    bot.loop.create_task(check_status())
+   check_status.start()
 
 
 @bot.command()
