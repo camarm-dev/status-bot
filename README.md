@@ -25,6 +25,8 @@ and add you own data:
 ]}
 ```
 
+**To check ip/hostname with tcp write `host://ip` / `host://hostname`**
+
 NOTES: `url`: _url of service_ (**string**), `nom`: _the name that will be showed_ (**string**), `desc`: _a description_ (**string**), `notify`: _if on true, a dm will be sent when service is down and embed will be red with an error gif, if on false nothing will happen except the red circle on embed_ (**bool**)
 
 and type in a terminal

@@ -1,15 +1,16 @@
-import asyncio
 import datetime
 import json
 import random
-
 import conf as cf
 import discord
 from discord.ext import commands, tasks
 import requests
+import pythonping
+import urllib3
 
 bot = commands.Bot(command_prefix=".", description="Lambda.")
 
+urllib3.disable_warnings()
 conf = cf.asdict()
 token = conf['Bot']['token']
 invite = conf['Bot']['invite']
@@ -28,12 +29,16 @@ timeout = 120
 
 def ping(url):
     try:
-        response = requests.get(url, verify=False)
-        if response.ok or response.status_code in [404]:
-            return True
-        return False
+        if url.startswith('host://'):
+            url = url.replace('host://', '')
+            response = pythonping.ping(url, count=1)
+            return response.success()
+        else:
+            response = requests.get(url, verify=False)
+            if response.ok or response.status_code in [404]:
+                return True
+            return False
     except:
-        # raise e
         return False
 
 
@@ -51,7 +56,10 @@ async def check_status():
             emoji = '🔴'
             if service['notify']:
                 is_a_down = True
-                user_embed = discord.Embed(title='Oups...', description=f"It\'s seems like {service['url']} ({service['nom']} is down !)", color=discord.Color.dark_red())
+                service['url'] = service['url'].replace('host://', 'http://')
+                if not '.' in service['url']:
+                    service['url'] = 'http://example.com'
+                user_embed = discord.Embed(title='Oups...', description=f"It\'s seems like {service['url']} is down ! ({service['nom']} is down !)", color=discord.Color.dark_red())
                 user_embed.set_image(url=random.choice(gifs))
                 user_embed.set_author(name='Down service link here', url=service['url'], icon_url='https://cdn.discordapp.com/app-icons/987993226701058079/7236c41d6da22576a69f969d9c5397a9.png?size=256')
                 await user.send(embed=user_embed)
