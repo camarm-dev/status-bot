@@ -8,7 +8,7 @@ import requests
 import pythonping
 import urllib3
 
-bot = commands.Bot(command_prefix=".", description="Lambda.")
+bot = commands.Bot(command_prefix=".", description="Lambda.", intents=discord.Intents.default())
 
 urllib3.disable_warnings()
 conf = cf.asdict()
